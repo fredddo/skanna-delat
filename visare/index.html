@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https: http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<title>Skanna – modell</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="stil.css">
+<script type="module" src="js/app.js"></script>
+<script nomodule src="js/gammal.js"></script>
+</head>
+<body>
+<main id="vy" aria-label="3D-vy">
+  <canvas id="duk" tabindex="0" aria-label="Modellen i 3D. Dra för att vrida, nyp eller rulla för att zooma."></canvas>
+  <svg id="overlagg" aria-hidden="true"></svg>
+  <div id="etiketter"></div>
+</main>
+
+<header id="topp">
+  <div class="rad">
+    <button id="knappObjekt" class="ikon" title="Objektpanelen (O)" aria-label="Objektpanelen" aria-pressed="false">☰</button>
+    <div class="titel"><strong id="modellNamn">Skanna</strong><span id="modellFran"></span></div>
+    <div class="verktyg" role="toolbar" aria-label="Verktyg">
+      <button data-verktyg="valj" title="Välj (V): klicka på en del eller yta">Välj</button>
+      <button data-verktyg="mat" title="Mät (M): klicka två punkter – fäster mot hörn och kanter">Mät</button>
+      <button data-verktyg="flytta" title="Flytta (G): dra en del i skärmplanet · dubbelklick lägger tillbaka">Flytta</button>
+      <button data-verktyg="peka" title="Peka (P): klicka en punkt och skriv en kommentar">Peka</button>
+    </div>
+    <button id="knappKommentarer" class="ikon text" title="Kommentarer" aria-pressed="false">Kommentarer<span id="antalKommentarer" class="bricka" hidden></span></button>
+  </div>
+  <div class="rad andra">
+    <label class="sprang" title="Spräng isär (E)">Spräng
+      <input id="sprang" type="range" min="0" max="1" step="0.01" value="0" aria-label="Spräng isär">
+    </label>
+    <div class="vyer">
+      <button id="knappPassa" title="Passa in (F eller 0)">Passa in</button>
+      <button id="knappVyer" aria-haspopup="true" aria-expanded="false" title="Standardvyer (1–7)">Vyer ▾</button>
+      <div id="vyMeny" class="meny" hidden>
+        <button data-vy="Topp">Uppifrån <kbd>1</kbd></button>
+        <button data-vy="−Y">Framifrån <kbd>2</kbd></button>
+        <button data-vy="+X">Höger <kbd>3</kbd></button>
+        <button data-vy="+Y">Bakifrån <kbd>4</kbd></button>
+        <button data-vy="−X">Vänster <kbd>5</kbd></button>
+        <button data-vy="Botten">Underifrån <kbd>6</kbd></button>
+        <button data-vy="Persp">Perspektiv <kbd>7</kbd></button>
+      </div>
+      <button id="knappAterstall" title="Återställ läge (R): lägg tillbaka flyttade delar och stäng sprängvyn">Återställ läge</button>
+    </div>
+    <span id="ortoLapp" hidden></span>
+  </div>
+</header>
+
+<aside id="objektpanel" class="panel vanster" aria-label="Objekt" hidden>
+  <div class="handtag" aria-hidden="true"></div>
+  <div class="panelhuvud"><h2>Objekt</h2><button class="stang ikon" data-stang="objektpanel" aria-label="Stäng">✕</button></div>
+  <div id="trad" class="lista" role="tree"></div>
+  <div class="panelfot">
+    <button id="knappVisaAlla" class="lank">Visa alla</button>
+    <button id="knappBaraVald" class="lank" hidden>Bara vald</button>
+  </div>
+</aside>
+
+<aside id="kommentarpanel" class="panel hoger" aria-label="Kommentarer" hidden>
+  <div class="handtag" aria-hidden="true"></div>
+  <div class="panelhuvud"><h2>Kommentarer</h2><button class="stang ikon" data-stang="kommentarpanel" aria-label="Stäng">✕</button></div>
+  <p class="hjalp" id="kommentarHjalp">Välj <b>Peka</b> och klicka i modellen för att lämna en kommentar. Kommentarerna sparas bara i den här webbläsaren tills du skickar dem.</p>
+  <ol id="kommentarLista" class="lista"></ol>
+  <div id="lankKommentarer" hidden>
+    <h3 id="lankKommentarRubrik">Kommentarer i länken</h3>
+    <ol id="lankKommentarLista" class="lista"></ol>
+  </div>
+  <div class="panelfot skicka">
+    <label>Ditt namn <input id="ditNamn" type="text" maxlength="80" autocomplete="name" placeholder="Valfritt"></label>
+    <button id="knappSkicka" class="primar" disabled>Skicka kommentarer</button>
+    <p id="skickaStatus" class="status" role="status"></p>
+    <div id="svarslankRuta" hidden>
+      <p id="svarslankText">Skicka den här länken till ägaren:</p>
+      <div class="lankrad">
+        <input id="svarslank" type="text" readonly aria-label="Svarslänk">
+        <button id="knappKopiera">Kopiera</button>
+        <button id="knappDela" hidden>Dela …</button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<section id="info" class="kort" hidden aria-live="polite">
+  <button class="stang ikon" id="infoStang" aria-label="Stäng">✕</button>
+  <div id="infoInnehall"></div>
+</section>
+
+<div id="kommentarRuta" class="kort" hidden>
+  <label for="kommentarText">Kommentar</label>
+  <textarea id="kommentarText" rows="3" maxlength="2000" placeholder="Skriv vad du vill säga om den här punkten …"></textarea>
+  <div class="knapprad">
+    <button id="knappAvbrytKommentar">Avbryt</button>
+    <button id="knappSparaKommentar" class="primar">Spara</button>
+  </div>
+</div>
+
+<div id="tips" role="status"></div>
+<div id="toast" role="status" hidden></div>
+
+<div id="laddar" class="skarm"><div class="snurra"></div><p id="laddarText">Hämtar modellen …</p></div>
+<div id="fel" class="skarm" hidden>
+  <div class="felkort">
+    <h1 id="felRubrik">Modellen kunde inte öppnas</h1>
+    <p id="felText"></p>
+  </div>
+</div>
+<noscript><div class="skarm"><div class="felkort"><h1>JavaScript behövs</h1><p>Slå på JavaScript för att visa modellen.</p></div></div></noscript>
+</body>
+</html>

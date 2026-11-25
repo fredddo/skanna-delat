@@ -1,0 +1,242 @@
+/* Skanna webbvisare – ljust/mörkt efter systemet, inga externa typsnitt. */
+:root {
+  --bg: #eef0f3;
+  --duk: #e9ecf0;
+  --yta: rgba(255, 255, 255, 0.92);
+  --yta-fast: #ffffff;
+  --text: #1d2228;
+  --dampad: #5d6772;
+  --linje: rgba(30, 40, 50, 0.16);
+  --accent: #1f6fd6;
+  --accent-text: #ffffff;
+  --accent-svag: rgba(31, 111, 214, 0.16);
+  --mat: #e8590c;
+  --nal: #d6336c;
+  --nal-lank: #7048e8;
+  --fara: #c92a2a;
+  --skugga: 0 2px 10px rgba(0, 0, 0, 0.12);
+  --radie: 10px;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15181c;
+    --duk: #1c2026;
+    --yta: rgba(34, 38, 45, 0.92);
+    --yta-fast: #262b33;
+    --text: #e8ebef;
+    --dampad: #9aa4af;
+    --linje: rgba(255, 255, 255, 0.14);
+    --accent: #4c9bff;
+    --accent-text: #0b1220;
+    --accent-svag: rgba(76, 155, 255, 0.22);
+    --mat: #ff8a3d;
+    --nal: #ff6b9a;
+    --nal-lank: #a78bfa;
+    --fara: #ff6b6b;
+    --skugga: 0 2px 12px rgba(0, 0, 0, 0.45);
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 14px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+[hidden] { display: none !important; }
+button, input, textarea { font: inherit; color: inherit; }
+button {
+  background: var(--yta-fast); border: 1px solid var(--linje); border-radius: 7px; padding: 5px 10px; cursor: pointer;
+  min-height: 32px; touch-action: manipulation;
+}
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: 0.5; cursor: default; border-color: var(--linje); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+button.primar { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+button.lank { background: none; border: none; color: var(--accent); padding: 4px 2px; min-height: 0; }
+button.ikon { padding: 4px 8px; min-width: 34px; }
+button[aria-pressed="true"], .verktyg button.vald { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+kbd { font: 11px ui-monospace, Menlo, monospace; color: var(--dampad); margin-left: auto; }
+
+#vy { position: fixed; inset: 0; }
+#duk { width: 100%; height: 100%; display: block; touch-action: none; background: var(--duk); outline: none; }
+#overlagg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+#etiketter { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+
+/* Verktygsraden */
+#topp {
+  position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; right: 8px; z-index: 5;
+  display: flex; flex-direction: column; gap: 6px; pointer-events: none;
+}
+#topp .rad { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+#topp .rad > * { pointer-events: auto; }
+#topp .titel {
+  display: flex; flex-direction: column; min-width: 0; max-width: 32vw; padding: 3px 10px;
+  background: var(--yta); border-radius: var(--radie); box-shadow: var(--skugga); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+#topp .titel strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#modellFran { font-size: 12px; color: var(--dampad); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#modellFran:empty { display: none; }
+.verktyg, .vyer, .sprang {
+  display: flex; gap: 4px; padding: 4px; align-items: center;
+  background: var(--yta); border-radius: var(--radie); box-shadow: var(--skugga); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.verktyg button, .vyer button { border-color: transparent; background: transparent; }
+.verktyg button:hover, .vyer button:hover { border-color: var(--linje); }
+#knappObjekt, #knappKommentarer { box-shadow: var(--skugga); }
+#knappKommentarer { margin-left: auto; }
+.sprang { padding: 4px 10px; gap: 8px; font-size: 13px; color: var(--dampad); }
+.sprang input { width: 150px; accent-color: var(--accent); }
+.vyer { position: relative; }
+.meny {
+  position: absolute; top: calc(100% + 4px); left: 0; z-index: 10; display: flex; flex-direction: column; min-width: 170px; padding: 4px;
+  background: var(--yta-fast); border: 1px solid var(--linje); border-radius: var(--radie); box-shadow: var(--skugga);
+}
+.meny button { display: flex; gap: 12px; text-align: left; border: none; background: none; }
+.meny button:hover { background: var(--accent-svag); }
+.bricka { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 6px; border-radius: 9px; font-size: 11px; line-height: 18px; text-align: center; background: var(--nal); color: #fff; }
+#ortoLapp { font-size: 12px; color: var(--dampad); background: var(--yta); padding: 3px 8px; border-radius: 6px; }
+
+/* Paneler */
+.panel {
+  position: fixed; z-index: 4; top: 104px; bottom: 12px; width: 300px; display: flex; flex-direction: column;
+  background: var(--yta); border: 1px solid var(--linje); border-radius: var(--radie); box-shadow: var(--skugga);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.panel.vanster { left: 8px; }
+.panel.hoger { right: 8px; width: 320px; }
+.panelhuvud { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px 4px 12px; }
+.panelhuvud h2 { font-size: 15px; margin: 0; }
+.panel .lista { flex: 1; overflow: auto; margin: 0; padding: 2px 6px 6px; list-style: none; min-height: 40px; }
+.panelfot { padding: 8px 12px 10px; border-top: 1px solid var(--linje); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.handtag { display: none; }
+.hjalp { margin: 0 12px 6px; font-size: 12px; color: var(--dampad); }
+.status { margin: 0; font-size: 12px; color: var(--dampad); width: 100%; }
+.status.fel { color: var(--fara); }
+.status.ok { color: var(--accent); }
+
+/* Trädet */
+.trad-rad {
+  display: flex; align-items: center; gap: 6px; padding: 4px 4px; border-radius: 6px; cursor: pointer; user-select: none; min-height: 34px;
+}
+.trad-rad:hover { background: var(--accent-svag); }
+.trad-rad.vald { background: var(--accent-svag); box-shadow: inset 0 0 0 1px var(--accent); }
+.trad-rad.stig { background: rgba(127, 127, 127, 0.08); }
+.trad-rad.slackt .namn, .trad-rad.slackt .prick { opacity: 0.45; }
+.trad-rubrik { font-size: 12px; color: var(--dampad); padding: 8px 4px 2px; }
+.pil { width: 18px; min-width: 18px; height: 22px; min-height: 0; padding: 0; border: none; background: none; color: var(--dampad); font-size: 10px; }
+.pil.tom { visibility: hidden; }
+.prick { width: 11px; height: 11px; min-width: 11px; border-radius: 50%; }
+.lada-ikon { width: 11px; min-width: 11px; height: 9px; border: 1.5px solid var(--dampad); border-radius: 2px; }
+.trad-rad .namn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.trad-rad .namn span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trad-rad .namn .under { font-size: 11px; color: var(--dampad); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.oga { border: none; background: none; min-height: 0; padding: 2px 4px; width: 30px; height: 26px; color: var(--text); }
+.oga svg { width: 18px; height: 18px; display: block; margin: auto; }
+.oga.av { color: var(--dampad); }
+
+/* Kommentarer */
+.kommentar { display: flex; gap: 8px; padding: 6px 4px; border-bottom: 1px solid var(--linje); cursor: pointer; }
+.kommentar:hover { background: var(--accent-svag); }
+.kommentar .nr { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--nal); color: #fff; font-size: 12px; text-align: center; line-height: 22px; font-weight: 600; }
+.kommentar.lank .nr { background: var(--nal-lank); }
+.kommentar .kropp { flex: 1; min-width: 0; }
+.kommentar .text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.kommentar .meta { font-size: 11px; color: var(--dampad); }
+.kommentar .bort { border: none; background: none; min-height: 0; padding: 0 4px; color: var(--dampad); align-self: flex-start; }
+#lankKommentarer h3 { font-size: 13px; margin: 8px 12px 2px; color: var(--dampad); }
+.skicka label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--dampad); flex: 1; min-width: 140px; }
+.skicka input[type="text"] { padding: 6px 8px; border: 1px solid var(--linje); border-radius: 6px; background: var(--yta-fast); }
+#svarslankRuta { width: 100%; }
+#svarslankRuta p { margin: 0 0 4px; font-size: 12px; }
+.lankrad { display: flex; gap: 4px; }
+.lankrad input { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid var(--linje); border-radius: 6px; background: var(--yta-fast); font-size: 12px; }
+
+/* Kort */
+.kort {
+  position: fixed; z-index: 6; background: var(--yta-fast); border: 1px solid var(--linje); border-radius: var(--radie);
+  box-shadow: var(--skugga); padding: 10px 12px;
+}
+#info { left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom)); min-width: 220px; max-width: min(440px, calc(100vw - 24px)); padding-right: 36px; }
+#info .stang { position: absolute; top: 4px; right: 4px; border: none; background: none; }
+#info h3 { margin: 0 0 4px; font-size: 14px; }
+#info table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+#info td { padding: 1px 12px 1px 0; vertical-align: top; }
+#info td:first-child { color: var(--dampad); }
+#info .stort { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+#info .dx, #info .dy { margin-right: 12px; }
+#info .dx { color: #d9480f; } #info .dy { color: #2b8a3e; } #info .dz { color: #1c7ed6; }
+#kommentarRuta { width: min(320px, calc(100vw - 24px)); display: flex; flex-direction: column; gap: 6px; }
+#kommentarRuta label { font-size: 12px; color: var(--dampad); }
+#kommentarRuta textarea { width: 100%; resize: vertical; padding: 6px 8px; border: 1px solid var(--linje); border-radius: 6px; background: var(--bg); }
+.knapprad { display: flex; gap: 6px; justify-content: flex-end; }
+
+#tips {
+  position: fixed; z-index: 3; left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom));
+  font-size: 12px; color: var(--dampad); background: var(--yta); padding: 4px 10px; border-radius: 12px; pointer-events: none;
+  white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis;
+}
+#tips:empty { display: none; }
+#info:not([hidden]) ~ #tips { display: none; }
+#toast {
+  position: fixed; z-index: 20; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 10px 16px; border-radius: 12px;
+  background: rgba(20, 24, 30, 0.88); color: #fff; font-weight: 500; pointer-events: none; text-align: center; max-width: 80vw;
+}
+
+/* Nålar, mätpunkter, etiketter */
+.nal {
+  position: absolute; left: 0; top: 0; width: 24px; height: 24px; margin: -24px 0 0 0; pointer-events: auto; cursor: pointer;
+  border-radius: 50% 50% 50% 0; transform-origin: 0 100%; rotate: -45deg; background: var(--nal); opacity: 0.82;
+  border: 2px solid rgba(255, 255, 255, 0.9); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center;
+}
+.nal span { rotate: 45deg; color: #fff; font-size: 11px; font-weight: 700; }
+.nal.lank { background: var(--nal-lank); }
+.nal.skymd { opacity: 0.3; }
+.nal.ny { background: var(--accent); }
+.nal.aktiv { opacity: 1; outline: 2px solid var(--accent); }
+.punkt { position: absolute; left: 0; top: 0; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--mat); border: 2px solid #fff; box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); }
+.punkt.faste { background: #fab005; width: 12px; height: 12px; margin: -6px 0 0 -6px; }
+.matetikett {
+  position: absolute; left: 0; top: 0; translate: -50% -50%; padding: 2px 7px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  background: rgba(20, 24, 30, 0.8); color: #fff; white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+#overlagg line.mat { stroke: var(--mat); stroke-width: 2; }
+#overlagg line.mat-skugga { stroke: rgba(255, 255, 255, 0.7); stroke-width: 4; }
+#overlagg polyline.kant { fill: none; stroke: #3bc9db; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Skärmar */
+.skarm {
+  position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  background: var(--bg); padding: 24px; text-align: center;
+}
+.felkort { max-width: 460px; background: var(--yta-fast); border: 1px solid var(--linje); border-radius: 14px; padding: 22px 26px; box-shadow: var(--skugga); }
+.felkort h1 { font-size: 19px; margin: 0 0 8px; }
+.felkort p { margin: 0; color: var(--dampad); }
+.snurra { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--linje); border-top-color: var(--accent); animation: snurra 0.9s linear infinite; }
+@keyframes snurra { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .snurra { animation-duration: 3s; } }
+
+/* Smal skärm: paneler som utdragbara lådor nerifrån */
+@media (max-width: 720px) {
+  #topp .titel { max-width: calc(100vw - 200px); }
+  #topp .rad { gap: 4px; }
+  .verktyg { order: 5; width: 100%; justify-content: space-between; }
+  .verktyg button { flex: 1; }
+  #topp .andra { flex-wrap: nowrap; }
+  .sprang { flex: 1; min-width: 0; }
+  .sprang input { width: 100%; min-width: 60px; }
+  #knappAterstall { display: none; }
+  .panel, .panel.hoger {
+    top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 62vh; min-height: 30vh; border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom); z-index: 7; transition: transform 0.22s ease; background: var(--yta-fast);
+  }
+  .panel.drar { transition: none; }
+  .handtag { display: block; width: 44px; height: 5px; border-radius: 3px; background: var(--linje); margin: 8px auto 0; cursor: grab; touch-action: none; }
+  .panelhuvud { touch-action: none; }
+  #info { bottom: max(10px, env(safe-area-inset-bottom)); }
+  .trad-rad { min-height: 40px; }
+  .oga { width: 40px; height: 34px; }
+}
